@@ -22,14 +22,28 @@ const CaptainSignup = () => {
       fullname: { firstname: firstName, lastname: lastName },
       email: email,
       password: password,
-      vehicle: { color: vehicleColor, plate: vehiclePlate, capacity: vehicleCapacity, vehicleType: vehicleType }
+      vehicle: {
+        color: vehicleColor,
+        plate: vehiclePlate,
+        // parse to integer — React state from <input type="number"> is a string,
+        // but the backend validator uses isInt({ min: 1 })
+        capacity: parseInt(vehicleCapacity, 10),
+        vehicleType: vehicleType
+      }
     }
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, captainData)
-    if (response.status === 201) {
-      const data = response.data
-      setCaptain(data.captain)
-      localStorage.setItem('captain-token', data.token)
-      navigate('/captain-home')
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, captainData)
+      if (response.status === 201) {
+        const data = response.data
+        setCaptain(data.captain)
+        localStorage.setItem('captain-token', data.token)
+        navigate('/captain-home')
+      }
+    } catch (err) {
+      const messages = err.response?.data?.errors?.map(e => e.msg).join('\n')
+                    || err.response?.data?.message
+                    || 'Registration failed. Please try again.'
+      alert(messages)
     }
     setEmail(''); setFirstName(''); setLastName(''); setPassword('')
     setVehicleColor(''); setVehiclePlate(''); setVehicleCapacity(''); setVehicleType('')
@@ -83,7 +97,7 @@ const CaptainSignup = () => {
                   <option value="" disabled>Vehicle type</option>
                   <option value="car">Car</option>
                   <option value="auto">Auto</option>
-                  <option value="moto">Moto</option>
+                  <option value="motorcycle">Motorcycle</option>
                 </select>
               </div>
             </div>
