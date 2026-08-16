@@ -111,6 +111,20 @@ const ConfirmRidePopUp = (props) => {
                 </div>
             </div>
 
+            {/* OTP display — captain sees the expected OTP to verify with the user */}
+            {props.ride?.otp && (
+                <div className='bg-indigo-50 border-2 border-indigo-300 rounded-2xl p-4 mb-4 text-center'>
+                    <p className='text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1'>
+                        <i className='ri-shield-keyhole-line mr-1'></i>
+                        Expected OTP from Rider
+                    </p>
+                    <p className='text-4xl font-extrabold text-indigo-700 font-mono tracking-[0.4em]'>
+                        {props.ride.otp}
+                    </p>
+                    <p className='text-xs text-indigo-400 mt-1'>Ask the rider to confirm this OTP</p>
+                </div>
+            )}
+
             {/* OTP form */}
             <form onSubmit={submitHander}>
                 <label className='block text-sm font-bold text-slate-700 mb-2'>Enter Rider OTP</label>

@@ -43,17 +43,32 @@ const Home = () => {
         socket.emit("join", { userType: "user", userId: user._id })
     }, [ user ])
 
-    socket.on('ride-confirmed', ride => {
-        setVehicleFound(false)
-        setWaitingForDriver(true)
-        setRide(ride)
-    })
+    // Socket listeners must be inside useEffect with cleanup.
+    // Registering them directly in the component body causes duplicate
+    // listeners on every re-render — the ride-confirmed handler fires
+    // multiple times, eventually with stale/empty data, which is why
+    // props.ride?.otp shows up blank in WaitingForDriver.
+    useEffect(() => {
+        const onRideConfirmed = (ride) => {
+            setVehicleFound(false)
+            setWaitingForDriver(true)
+            setRide(ride)
+        }
 
-    socket.on('ride-started', ride => {
-        console.log("ride")
-        setWaitingForDriver(false)
-        navigate('/riding', { state: { ride } })
-    })
+        const onRideStarted = (ride) => {
+            setWaitingForDriver(false)
+            navigate('/riding', { state: { ride } })
+        }
+
+        socket.on('ride-confirmed', onRideConfirmed)
+        socket.on('ride-started', onRideStarted)
+
+        // Clean up listeners when component unmounts or socket changes
+        return () => {
+            socket.off('ride-confirmed', onRideConfirmed)
+            socket.off('ride-started', onRideStarted)
+        }
+    }, [ socket ])
 
     const handlePickupChange = async (e) => {
         setPickup(e.target.value)

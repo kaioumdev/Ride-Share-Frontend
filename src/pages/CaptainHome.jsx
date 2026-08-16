@@ -63,11 +63,20 @@ const CaptainHome = () => {
     }, [ socket ])
 
     async function confirmRide() {
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`, {
-            rideId: ride._id, captainId: captain._id,
-        }, { headers: { Authorization: `Bearer ${localStorage.getItem('captain-token')}` } })
-        setRidePopupPanel(false)
-        setConfirmRidePopupPanel(true)
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`, {
+                rideId: ride._id, captainId: captain._id,
+            }, { headers: { Authorization: `Bearer ${localStorage.getItem('captain-token')}` } })
+
+            // Update ride state with the confirmed ride data from backend.
+            // This response includes the OTP (backend uses select('+otp') in confirmRide service)
+            // so ConfirmRidePopUp can display it for the captain to verify with the user.
+            setRide(response.data)
+            setRidePopupPanel(false)
+            setConfirmRidePopupPanel(true)
+        } catch (err) {
+            console.error('Failed to confirm ride:', err)
+        }
     }
 
     useGSAP(function () {

@@ -28,12 +28,22 @@ const WaitingForDriver = (props) => {
                 </div>
             </div>
 
-            {/* OTP box */}
-            <div className='bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-4 mb-4 text-center'>
-                <p className='text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1'>Share this OTP with your captain</p>
-                <p className='text-3xl font-extrabold text-indigo-700 font-mono tracking-[0.3em]'>
-                    {props.ride?.otp}
+            {/* OTP box — large and prominent so user can easily read it to captain */}
+            <div className='bg-indigo-600 rounded-2xl p-5 mb-4 text-center shadow-lg shadow-indigo-200'>
+                <p className='text-xs font-bold text-indigo-200 uppercase tracking-wider mb-2'>
+                    <i className='ri-shield-keyhole-line mr-1'></i>
+                    Your Ride OTP — Share with Captain
                 </p>
+                {props.ride?.otp ? (
+                    <p className='text-5xl font-extrabold text-white font-mono tracking-[0.5em] py-1'>
+                        {props.ride.otp}
+                    </p>
+                ) : (
+                    <p className='text-2xl font-bold text-indigo-300 animate-pulse py-2'>
+                        Loading OTP...
+                    </p>
+                )}
+                <p className='text-xs text-indigo-300 mt-2'>Tell this code to your captain to start the ride</p>
             </div>
 
             {/* Trip details */}
