@@ -22,22 +22,39 @@ const CaptainHome = () => {
 
     useEffect(() => {
         socket.emit('join', { userId: captain._id, userType: 'captain' })
+        const locationIntervalRef = { current: null }
+
         const updateLocation = () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
+            if (!navigator.geolocation) return
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
                     socket.emit('update-location-captain', {
                         userId: captain._id,
-                        location: { ltd: position.coords.latitude, lng: position.coords.longitude }
+                        location: {
+                            ltd: position.coords.latitude,
+                            lng: position.coords.longitude
+                        }
                     })
-                })
-            }
+                },
+                (err) => {
+                    // code 1 = permission denied — stop the interval to avoid repeated denials
+                    if (err.code === 1) {
+                        console.warn('Location permission denied. Captain location updates paused.')
+                        clearInterval(locationIntervalRef.current)
+                    } else {
+                        console.warn('Could not get captain location:', err.message)
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+            )
         }
-        const locationInterval = setInterval(updateLocation, 10000)
+
+        locationIntervalRef.current = setInterval(updateLocation, 10000)
         updateLocation()
         socket.on('connect', () => {
             socket.emit('join', { userId: captain._id, userType: 'captain' })
         })
-        return () => { clearInterval(locationInterval); socket.off('connect') }
+        return () => { clearInterval(locationIntervalRef.current); socket.off('connect') }
     }, [])
 
     useEffect(() => {
